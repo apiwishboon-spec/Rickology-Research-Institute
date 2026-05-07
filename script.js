@@ -166,7 +166,6 @@ function startProcessing() {
 
 // The Trap
 let player;
-let fsInterval;
 
 function onYouTubeIframeAPIReady() {
     // This is called by the YouTube API script
@@ -213,41 +212,61 @@ function onPlayerStateChange(event) {
 function forceFullscreen() {
     const docEl = document.documentElement;
     const requestFs = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
-    
-    if (requestFs) {
-        requestFs.call(docEl).catch(() => {});
-    }
+    const notice = document.getElementById('fs-notice');
 
-    // Aggressive "Spam" Fullscreen Logic
-    const enforceFs = () => {
-        const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
-        
-        if (!isFs && !views.trap.classList.contains('hidden')) {
-            // Check if player ended (state 0)
+    const triggerFs = (e) => {
+        // Only trigger if trap is visible and video hasn't ended
+        if (!views.trap.classList.contains('hidden')) {
             let isEnded = false;
-            try {
-                if (player && player.getPlayerState() === 0) isEnded = true;
-            } catch(e) {}
+            try { if (player && player.getPlayerState() === 0) isEnded = true; } catch(e) {}
 
-            if (!isEnded && requestFs) {
-                requestFs.call(docEl).catch(() => {});
+            if (!isEnded) {
+                // If we're not in fullscreen, try to enter it
+                if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                    if (requestFs) {
+                        requestFs.call(docEl)
+                            .then(() => {
+                                notice.classList.add('hidden');
+                                if (player && typeof player.playVideo === 'function') player.playVideo();
+                            })
+                            .catch(() => {
+                                // If blocked, show the notice to force a real "click"
+                                notice.classList.remove('hidden');
+                            });
+                    }
+                }
             }
         }
     };
 
-    document.addEventListener('fullscreenchange', enforceFs);
-    document.addEventListener('webkitfullscreenchange', enforceFs);
-    document.addEventListener('mozfullscreenchange', enforceFs);
-    document.addEventListener('MSFullscreenChange', enforceFs);
+    // Hijack EVERY possible user gesture
+    const gestures = ['click', 'mousedown', 'mouseup', 'keydown', 'touchstart', 'touchend', 'scroll', 'wheel', 'dblclick'];
+    gestures.forEach(evt => {
+        document.addEventListener(evt, triggerFs, true);
+    });
 
-    // Also "Spam" check every 500ms
-    if (fsInterval) clearInterval(fsInterval);
-    fsInterval = setInterval(enforceFs, 500);
+    // Also check on fullscreen change
+    const onFsChange = () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+            if (!views.trap.classList.contains('hidden')) {
+                notice.classList.remove('hidden');
+                if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+            }
+        }
+    };
+
+    document.addEventListener('fullscreenchange', onFsChange);
+    document.addEventListener('webkitfullscreenchange', onFsChange);
+    document.addEventListener('mozfullscreenchange', onFsChange);
+    document.addEventListener('MSFullscreenChange', onFsChange);
+
+    // Initial trigger attempt
+    if (requestFs) requestFs.call(docEl).catch(() => {
+        notice.classList.remove('hidden');
+    });
 }
 
 function exitTrap() {
-    if (fsInterval) clearInterval(fsInterval);
-
     if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
     } else if (document.webkitExitFullscreen) {
