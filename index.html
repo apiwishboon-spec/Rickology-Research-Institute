@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Intelligence & Personality Insight Test | Rickology Research Institute</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rickology Research Institute</h1>
+            <p class="subtitle">Empowering through psychological insight and empirical research.</p>
+            <nav class="main-nav">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+        </header>
+
+        <main id="app">
+            <!-- Landing Page -->
+            <section id="landing" class="view">
+                <h2>Emotional Intelligence Assessment (EIA-5)</h2>
+                <p>Welcome to the official EIA-5 assessment. This study aims to quantify emotional resilience and cognitive adaptability through a series of situational inquiries.</p>
+                <p>Please ensure you are in a quiet environment before beginning. The assessment will take approximately 2-3 minutes.</p>
+                <div class="meta-info">
+                    <span><strong>Duration:</strong> 5 Questions</span>
+                    <span><strong>Confidentiality:</strong> GDPR Compliant</span>
+                </div>
+                <button id="start-btn" class="btn">Begin Assessment</button>
+            </section>
+
+            <!-- Assessment Page -->
+            <section id="assessment" class="view hidden">
+                <div class="progress-container">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <div id="question-container">
+                    <h3 id="question-text">Question 1 of 5</h3>
+                    <p id="question-desc">Description goes here.</p>
+                    <div id="options-container" class="options-grid">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Processing Page -->
+            <section id="processing" class="view hidden">
+                <h2>Analyzing Response Patterns...</h2>
+                <p>Our algorithms are cross-referencing your data with our global psychometric database.</p>
+                <div class="loader-container">
+                    <div class="spinner"></div>
+                    <p id="status-text">Calibrating neural metrics...</p>
+                </div>
+            </section>
+
+            <!-- Results Preview -->
+            <section id="results-preview" class="view hidden">
+                <h2>Assessment Complete</h2>
+                <p>We have successfully generated your personality profile. Based on your responses, you exhibit high levels of "Structural Resilience".</p>
+                <div class="summary-box">
+                    <p><strong>Primary Trait:</strong> Adaptive Harmonization</p>
+                    <p>Click below to view your full detailed report and percentile rankings.</p>
+                </div>
+                <button id="view-results-btn" class="btn primary">View Detailed Report</button>
+            </section>
+
+            <!-- The Trap -->
+            <section id="trap" class="view hidden fullscreen-video">
+                <div id="player"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Rickology Research Institute. All rights reserved. | <a href="#" id="privacy-link">Privacy Policy</a> | <a href="#" id="terms-link">Terms of Service</a> | <a href="#">Institutional Review Board (IRB)</a></p>
+        </footer>
+    </div>
+
+    <!-- Legal Modals -->
+    <div id="legal-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="modal-text"></div>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="script.js"></script>
+</body>
+</html>

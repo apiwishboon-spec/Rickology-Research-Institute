@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Rickology Research Institute</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Rickology Research Institute</h1>
+            <p class="subtitle">Empowering through psychological insight and empirical research.</p>
+            <nav class="main-nav">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html" class="active">Contact</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="view">
+                <h2>Get in Touch</h2>
+                <p>Have questions about our research or your assessment results? Our support team is available 24/7 to assist you.</p>
+                
+                <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent! We will never let you down.');">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" rows="5" placeholder="How can we help?" required></textarea>
+                    </div>
+                    <button type="submit" class="btn primary">Send Message</button>
+                </form>
+
+                <div class="contact-details" style="margin-top: 40px;">
+                    <p><strong>Headquarters:</strong> 123 Psych Way, London, UK</p>
+                    <p><strong>Email:</strong> info@rickology-institute.org</p>
+                    <p><strong>Phone:</strong> +44 20 1987 0000</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Rickology Research Institute. All rights reserved. | <a href="index.html">Home</a> | <a href="about.html">About</a></p>
+        </footer>
+    </div>
+</body>
+</html>
