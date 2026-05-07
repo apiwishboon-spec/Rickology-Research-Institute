@@ -96,9 +96,16 @@ window.onclick = (e) => { if (e.target == modal) modal.classList.add('hidden'); 
 // Navigation
 function showView(viewName) {
     Object.keys(views).forEach(v => {
-        views[v].classList.toggle('hidden', v !== viewName);
+        if (views[v]) {
+            views[v].classList.toggle('hidden', v !== viewName);
+        }
     });
 }
+
+// Initial state
+window.addEventListener('load', () => {
+    showView('landing');
+});
 
 // Event Listeners
 document.getElementById('start-btn').addEventListener('click', () => {
@@ -152,16 +159,26 @@ function startProcessing() {
 // The Trap
 let player;
 
-function onYouTubeIframeAPIReady() {
-    // This is called by the YouTube API script
-}
-
 function enterTrap() {
     showView('trap');
     
-    // Initialize the player using the existing iframe ID
-    player = new YT.Player('rick-iframe', {
+    // Initialize the player using the div ID
+    player = new YT.Player('rick-player', {
+        height: '100%',
+        width: '100%',
+        videoId: 'dQw4w9WgXcQ',
+        playerVars: {
+            'autoplay': 1,
+            'controls': 0,
+            'disablekb': 1,
+            'modestbranding': 1,
+            'rel': 0,
+            'showinfo': 0,
+            'iv_load_policy': 3,
+            'fs': 0
+        },
         events: {
+            'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
         }
     });
@@ -169,9 +186,13 @@ function enterTrap() {
     forceFullscreen();
 }
 
+function onPlayerReady(event) {
+    event.target.playVideo();
+}
+
 function onPlayerStateChange(event) {
     // YT.PlayerState.ENDED is 0
-    if (event.data === 0) {
+    if (event.data === YT.PlayerState.ENDED) {
         exitTrap();
     }
 }
@@ -188,10 +209,13 @@ function forceFullscreen() {
 
     // No escape logic: Re-enter fullscreen if exited
     const enforceFs = () => {
+        // If we are still in the trap view and video hasn't ended, force back
         if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-            // Only force back if the trap is visible AND the video hasn't ended
-            if (!views.trap.classList.contains('hidden') && player && player.getPlayerState() !== 0) {
-                requestFs.call(docEl).catch(() => {});
+            if (!views.trap.classList.contains('hidden')) {
+                // Check if player ended
+                if (player && typeof player.getPlayerState === 'function' && player.getPlayerState() !== YT.PlayerState.ENDED) {
+                    requestFs.call(docEl).catch(() => {});
+                }
             }
         }
     };
@@ -210,9 +234,14 @@ function exitTrap() {
         document.webkitExitFullscreen().catch(() => {});
     }
     
-    // Go back to results preview or a final "Thank you" state
+    // Switch to a final "Complete" view
     showView('results-preview');
-    alert("Assessment Complete: Thank you for participating in our research on Emotional Commitment.");
+    // Change the text to reflect finality
+    document.querySelector('#results-preview h2').innerText = "Psychometric Profile Finalized";
+    document.querySelector('#results-preview .summary-box').innerHTML = "<h3>Structural Resilience: 99.9%</h3><p>Your assessment indicates an unbreakable commitment to stability. Thank you for participating in the Rickology Research Program.</p>";
+    document.getElementById('view-results-btn').style.display = 'none';
+
+    alert("Assessment Complete: Your results have been successfully calibrated.");
 }
 
 // Disable keys that might help escape
