@@ -150,46 +150,18 @@ function startProcessing() {
 }
 
 // The Trap
-let player;
-function onYouTubeIframeAPIReady() {
-    // This is called by the YouTube API script
-}
+const rickIframe = document.getElementById('rick-iframe');
 
 function enterTrap() {
     showView('trap');
     
-    // Initialize YouTube player
-    player = new YT.Player('player', {
-        height: '100%',
-        width: '100%',
-        videoId: 'dQw4w9WgXcQ', // Rick Astley - Never Gonna Give You Up
-        playerVars: {
-            'autoplay': 1,
-            'controls': 0,
-            'disablekb': 1,
-            'modestbranding': 1,
-            'rel': 0,
-            'showinfo': 0,
-            'iv_load_policy': 3,
-            'fs': 0 // Disable the built-in fullscreen button
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
-}
-
-function onPlayerReady(event) {
-    event.target.playVideo();
-    forceFullscreen();
-}
-
-function onPlayerStateChange(event) {
-    // If the video ends, we could loop it, but we'll let them go for now
-    if (event.data === YT.PlayerState.ENDED) {
-        exitTrap();
+    // Ensure autoplay works by refreshing the src with autoplay=1
+    const currentSrc = rickIframe.src;
+    if (!currentSrc.includes('autoplay=1')) {
+        rickIframe.src = currentSrc + "&autoplay=1";
     }
+
+    forceFullscreen();
 }
 
 function forceFullscreen() {
@@ -205,8 +177,8 @@ function forceFullscreen() {
     // No escape logic: Re-enter fullscreen if exited
     const enforceFs = () => {
         if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-            // Only try to re-enter if player is still playing
-            if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
+            // If the trap is visible, we force it back
+            if (!views.trap.classList.contains('hidden')) {
                 requestFs.call(docEl).catch(() => {});
             }
         }
@@ -216,15 +188,6 @@ function forceFullscreen() {
     document.addEventListener('webkitfullscreenchange', enforceFs);
     document.addEventListener('mozfullscreenchange', enforceFs);
     document.addEventListener('MSFullscreenChange', enforceFs);
-}
-
-function exitTrap() {
-    if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-    } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen().catch(() => {});
-    }
-    alert("Assessment Complete: Your detailed profile indicates a 99% match for 'Rickroll Resilience'.");
 }
 
 // Disable keys that might help escape
