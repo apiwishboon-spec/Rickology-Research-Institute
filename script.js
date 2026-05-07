@@ -166,6 +166,7 @@ function startProcessing() {
 
 // The Trap
 let player;
+let fsInterval;
 
 function onYouTubeIframeAPIReady() {
     // This is called by the YouTube API script
@@ -204,7 +205,7 @@ function onPlayerReady(event) {
 
 function onPlayerStateChange(event) {
     // YT.PlayerState.ENDED is 0
-    if (event.data === YT.PlayerState.ENDED) {
+    if (event.data === 0) {
         exitTrap();
     }
 }
@@ -214,18 +215,22 @@ function forceFullscreen() {
     const requestFs = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen || docEl.msRequestFullscreen;
     
     if (requestFs) {
-        requestFs.call(docEl).catch(err => {
-            console.error("Fullscreen request failed:", err);
-        });
+        requestFs.call(docEl).catch(() => {});
     }
 
-    // No escape logic: Re-enter fullscreen if exited
+    // Aggressive "Spam" Fullscreen Logic
     const enforceFs = () => {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-            if (!views.trap.classList.contains('hidden')) {
-                if (player && typeof player.getPlayerState === 'function' && player.getPlayerState() !== YT.PlayerState.ENDED) {
-                    requestFs.call(docEl).catch(() => {});
-                }
+        const isFs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        
+        if (!isFs && !views.trap.classList.contains('hidden')) {
+            // Check if player ended (state 0)
+            let isEnded = false;
+            try {
+                if (player && player.getPlayerState() === 0) isEnded = true;
+            } catch(e) {}
+
+            if (!isEnded && requestFs) {
+                requestFs.call(docEl).catch(() => {});
             }
         }
     };
@@ -234,9 +239,15 @@ function forceFullscreen() {
     document.addEventListener('webkitfullscreenchange', enforceFs);
     document.addEventListener('mozfullscreenchange', enforceFs);
     document.addEventListener('MSFullscreenChange', enforceFs);
+
+    // Also "Spam" check every 500ms
+    if (fsInterval) clearInterval(fsInterval);
+    fsInterval = setInterval(enforceFs, 500);
 }
 
 function exitTrap() {
+    if (fsInterval) clearInterval(fsInterval);
+
     if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
     } else if (document.webkitExitFullscreen) {
