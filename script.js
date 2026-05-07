@@ -35,9 +35,6 @@ const statusMessages = [
 ];
 
 let currentQuestionIndex = 0;
-const appState = {
-    view: 'landing'
-};
 
 // DOM Elements
 const views = {
@@ -53,7 +50,6 @@ const questionText = document.getElementById('question-text');
 const questionDesc = document.getElementById('question-desc');
 const optionsContainer = document.getElementById('options-container');
 const statusText = document.getElementById('status-text');
-const rickVideo = document.getElementById('rick-video');
 
 // Legal Modals Logic
 const modal = document.getElementById('legal-modal');
@@ -78,19 +74,26 @@ const legalContent = {
     `
 };
 
-document.getElementById('privacy-link').onclick = (e) => {
-    e.preventDefault();
-    modalText.innerHTML = legalContent.privacy;
-    modal.classList.remove('hidden');
-};
+if (document.getElementById('privacy-link')) {
+    document.getElementById('privacy-link').onclick = (e) => {
+        e.preventDefault();
+        modalText.innerHTML = legalContent.privacy;
+        modal.classList.remove('hidden');
+    };
+}
 
-document.getElementById('terms-link').onclick = (e) => {
-    e.preventDefault();
-    modalText.innerHTML = legalContent.terms;
-    modal.classList.remove('hidden');
-};
+if (document.getElementById('terms-link')) {
+    document.getElementById('terms-link').onclick = (e) => {
+        e.preventDefault();
+        modalText.innerHTML = legalContent.terms;
+        modal.classList.remove('hidden');
+    };
+}
 
-closeModal.onclick = () => modal.classList.add('hidden');
+if (closeModal) {
+    closeModal.onclick = () => modal.classList.add('hidden');
+}
+
 window.onclick = (e) => { if (e.target == modal) modal.classList.add('hidden'); };
 
 // Navigation
@@ -103,20 +106,24 @@ function showView(viewName) {
 }
 
 // Initial state
-window.addEventListener('load', () => {
-    showView('landing');
-});
+showView('landing');
 
 // Event Listeners
-document.getElementById('start-btn').addEventListener('click', () => {
-    showView('assessment');
-    renderQuestion();
-});
+if (document.getElementById('start-btn')) {
+    document.getElementById('start-btn').addEventListener('click', () => {
+        showView('assessment');
+        renderQuestion();
+    });
+}
 
-document.getElementById('view-results-btn').addEventListener('click', enterTrap);
+if (document.getElementById('view-results-btn')) {
+    document.getElementById('view-results-btn').addEventListener('click', enterTrap);
+}
 
 function renderQuestion() {
     const q = questions[currentQuestionIndex];
+    if (!q) return;
+
     questionText.innerText = `Question ${currentQuestionIndex + 1} of 5: ${q.text}`;
     questionDesc.innerText = q.desc;
     
@@ -147,17 +154,22 @@ function startProcessing() {
     let messageIndex = 0;
     
     const interval = setInterval(() => {
-        statusText.innerText = statusMessages[messageIndex];
-        messageIndex++;
-        if (messageIndex >= statusMessages.length) {
+        if (messageIndex < statusMessages.length) {
+            statusText.innerText = statusMessages[messageIndex];
+            messageIndex++;
+        } else {
             clearInterval(interval);
-            setTimeout(() => showView('results-preview'), 1000);
+            setTimeout(() => showView('resultsPreview'), 1000);
         }
     }, 1200);
 }
 
 // The Trap
 let player;
+
+function onYouTubeIframeAPIReady() {
+    // This is called by the YouTube API script
+}
 
 function enterTrap() {
     showView('trap');
@@ -209,10 +221,8 @@ function forceFullscreen() {
 
     // No escape logic: Re-enter fullscreen if exited
     const enforceFs = () => {
-        // If we are still in the trap view and video hasn't ended, force back
         if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
             if (!views.trap.classList.contains('hidden')) {
-                // Check if player ended
                 if (player && typeof player.getPlayerState === 'function' && player.getPlayerState() !== YT.PlayerState.ENDED) {
                     requestFs.call(docEl).catch(() => {});
                 }
@@ -227,19 +237,21 @@ function forceFullscreen() {
 }
 
 function exitTrap() {
-    // Release fullscreen
     if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
     } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen().catch(() => {});
     }
     
-    // Switch to a final "Complete" view
-    showView('results-preview');
-    // Change the text to reflect finality
-    document.querySelector('#results-preview h2').innerText = "Psychometric Profile Finalized";
-    document.querySelector('#results-preview .summary-box').innerHTML = "<h3>Structural Resilience: 99.9%</h3><p>Your assessment indicates an unbreakable commitment to stability. Thank you for participating in the Rickology Research Program.</p>";
-    document.getElementById('view-results-btn').style.display = 'none';
+    showView('resultsPreview');
+    
+    const resultsHeader = document.querySelector('#results-preview h2');
+    const resultsSummary = document.querySelector('#results-preview .summary-box');
+    const resultsBtn = document.getElementById('view-results-btn');
+
+    if (resultsHeader) resultsHeader.innerText = "Psychometric Profile Finalized";
+    if (resultsSummary) resultsSummary.innerHTML = "<h3>Structural Resilience: 99.9%</h3><p>Your assessment indicates an unbreakable commitment to stability. Thank you for participating in the Rickology Research Program.</p>";
+    if (resultsBtn) resultsBtn.style.display = 'none';
 
     alert("Assessment Complete: Your results have been successfully calibrated.");
 }
