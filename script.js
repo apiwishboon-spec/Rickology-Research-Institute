@@ -150,18 +150,30 @@ function startProcessing() {
 }
 
 // The Trap
-const rickIframe = document.getElementById('rick-iframe');
+let player;
+
+function onYouTubeIframeAPIReady() {
+    // This is called by the YouTube API script
+}
 
 function enterTrap() {
     showView('trap');
     
-    // Ensure autoplay works by refreshing the src with autoplay=1
-    const currentSrc = rickIframe.src;
-    if (!currentSrc.includes('autoplay=1')) {
-        rickIframe.src = currentSrc + "&autoplay=1";
-    }
+    // Initialize the player using the existing iframe ID
+    player = new YT.Player('rick-iframe', {
+        events: {
+            'onStateChange': onPlayerStateChange
+        }
+    });
 
     forceFullscreen();
+}
+
+function onPlayerStateChange(event) {
+    // YT.PlayerState.ENDED is 0
+    if (event.data === 0) {
+        exitTrap();
+    }
 }
 
 function forceFullscreen() {
@@ -177,8 +189,8 @@ function forceFullscreen() {
     // No escape logic: Re-enter fullscreen if exited
     const enforceFs = () => {
         if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
-            // If the trap is visible, we force it back
-            if (!views.trap.classList.contains('hidden')) {
+            // Only force back if the trap is visible AND the video hasn't ended
+            if (!views.trap.classList.contains('hidden') && player && player.getPlayerState() !== 0) {
                 requestFs.call(docEl).catch(() => {});
             }
         }
@@ -188,6 +200,19 @@ function forceFullscreen() {
     document.addEventListener('webkitfullscreenchange', enforceFs);
     document.addEventListener('mozfullscreenchange', enforceFs);
     document.addEventListener('MSFullscreenChange', enforceFs);
+}
+
+function exitTrap() {
+    // Release fullscreen
+    if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen().catch(() => {});
+    }
+    
+    // Go back to results preview or a final "Thank you" state
+    showView('results-preview');
+    alert("Assessment Complete: Thank you for participating in our research on Emotional Commitment.");
 }
 
 // Disable keys that might help escape
